@@ -10,14 +10,13 @@ and [sbt documentation](https://www.scala-sbt.org/release/docs/Using-Sonatype.ht
 Preparations
 -----------------
 
-### Set up [Sonatype account](https://central.sonatype.org/publish/publish-guide/#initial-setup) (for Maven Central)
+### Set up [Sonatype account](https://central.sonatype.org/register/central-portal/) (for Maven Central)
 
-*   Create personal Sonatype repository account through [Sonatype JIRA](https://issues.sonatype.org/secure/Signup!default.jspa).
+*   Create personal Sonatype repository account through [Sonatype Central](https://central.sonatype.com/api/auth/login).
 
-*   [Open a ticket](https://issues.sonatype.org/secure/CreateIssue.jspa?issuetype=21&pid=10134) to set up new project
-    and claim access to `fingo.info` domain.
+*   Claim access to `fingo.info` domain through [Publish Settings](https://central.sonatype.com/publishing/namespaces).
 
-*   Log in to [Sonatype](https://oss.sonatype.org/) and create a user token (Profile / User Token).
+*   Create a user toke through [Account](https://central.sonatype.com/account).
 
 ### Create [PGP keys](https://github.com/sbt/sbt-pgp) to sign releases
 
@@ -65,11 +64,11 @@ In case of compromised PGP private key, revoke it with following procedure:
 
 *   List keys: `gpg --list-keys`.
 
-*   Look up the key on server: `gpg --keyserver hkp://ipv4.pool.sks-keyservers.net --search-keys <key-id>`.
+*   Look up the key on server: `gpg --keyserver hkps://keys.openpgp.org --search-keys <key-id>`.
 
 *   Revoke key: `gpg --output revoke.asc --gen-revoke <key-id>`.
 
 *   Import revoked key to keychain: `gpg --import revoke.asc`.
 
-*   Publish revoke information: `gpg --keyserver hkp://ipv4.pool.sks-keyservers.net --send-keys <key-id>
+*   Publish revoke information: `gpg --keyserver hkps://keys.openpgp.org --send-keys <key-id>
     and set up publishing configuration again.

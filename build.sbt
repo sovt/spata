@@ -2,10 +2,11 @@ lazy val basicSettings = Seq(
   organization := "info.fingo",
   organizationName := "FINGO sp. z o.o.",
   organizationHomepage := Some(url("http://fingo.info")),
+  homepage := Some(url("https://github.com/fingo/spata")),
   startYear := Some(2020),
   name := "spata",
   description := "Functional, stream based CSV processor for Scala",
-  scalaVersion := "3.3.5"
+  scalaVersion := "3.3.6"
 )
 
 addCommandAlias("check", "; scalafmtCheck ; scalafix --check")
@@ -22,7 +23,6 @@ def unitFilter(name: String): Boolean = name.endsWith("TS") && !perfFilter(name)
 lazy val root = (project in file("."))
   .enablePlugins(AutomateHeaderPlugin)
   .settings(basicSettings *)
-  .settings(publishSettings *)
   .settings(licenseSettings *)
   .configs(PerformanceTest)
   .settings(
@@ -66,14 +66,7 @@ lazy val licenseSettings = Seq(
     LicenseCategory.PublicDomain,
     LicenseCategory.JSON,
     LicenseCategory.Unicode
-  )
-)
-
-import xerial.sbt.Sonatype.GitHubHosting
-lazy val publishSettings = Seq(
-  ThisBuild / sonatypeCredentialHost := "oss.sonatype.org",
-  sonatypeRepository := "https://oss.sonatype.org/service/local",
-  sonatypeProjectHosting := Some(GitHubHosting("fingo", "spata", "robert.marek@fingo.info")),
+  ),
   developers := List(Developer("susuro", "Robert Marek", "robert.marek@fingo.info", url("https://github.com/susuro")))
 )
 

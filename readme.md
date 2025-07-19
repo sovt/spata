@@ -7,6 +7,11 @@ spata
 [![Scala Doc](https://javadoc.io/badge2/info.fingo/spata_3/javadoc.svg)](https://javadoc.io/doc/info.fingo/spata_3/latest/info/fingo/spata/index.html)
 [![Gitter](https://badges.gitter.im/fingo-spata/community.svg)](https://gitter.im/fingo-spata/community)
 
+> [!IMPORTANT]
+> This project was previously maintained by **FINGO** and has been transferred to **sovt** as of 01.07.2025.
+> Future development and maintenance will be handled by **sovt contributors**.
+> Changes in the base package and published artifacts will follow with the next major release.
+
 **spata** is a functional tabular data (`CSV`) processor for Scala.
 The library is backed by [FS2 - Functional Streams for Scala](https://github.com/functional-streams-for-scala/fs2).
 

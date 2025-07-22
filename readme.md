@@ -1,22 +1,25 @@
 spata
 =====
 
-[![Build Status](https://github.com/fingo/spata/actions/workflows/ci.yaml/badge.svg)](https://github.com/fingo/spata/actions/workflows/ci.yaml)
-[![Code Coverage](https://codecov.io/gh/fingo/spata/branch/master/graph/badge.svg)](https://codecov.io/gh/fingo/spata)
+[![Build Status](https://github.com/sovt/spata/actions/workflows/ci.yaml/badge.svg)](https://github.com/sovt/spata/actions/workflows/ci.yaml)
+[![Code Coverage](https://codecov.io/gh/sovt/spata/branch/master/graph/badge.svg)](https://codecov.io/gh/sovt/spata)
 [![Maven Central](https://img.shields.io/maven-central/v/info.fingo/spata_3.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22info.fingo%22%20AND%20a:%22spata_3%22)
 [![Scala Doc](https://javadoc.io/badge2/info.fingo/spata_3/javadoc.svg)](https://javadoc.io/doc/info.fingo/spata_3/latest/info/fingo/spata/index.html)
 [![Gitter](https://badges.gitter.im/fingo-spata/community.svg)](https://gitter.im/fingo-spata/community)
 
 > [!IMPORTANT]
-> This project was previously maintained by **FINGO** and has been transferred to **sovt** as of 01.07.2025.
-> Future development and maintenance will be handled by **sovt contributors**.
-> Changes in the base package and published artifacts will follow with the next major release.
+> This library has been transferred from `FINGO` to `sovt` organization as of 01.07.2025.
+> Future development and maintenance will be handled by **sovt contributors**
+> under `dev.sovt.spata` package namespace and sbt coordinates.
+>
+> Please update your imports and build configuration accordingly.
+> See [migration.md](./migration.md) for full migration instructions.
 
 **spata** is a functional tabular data (`CSV`) processor for Scala.
 The library is backed by [FS2 - Functional Streams for Scala](https://github.com/functional-streams-for-scala/fs2).
 
 > **spata 3** supports Scala 3 only.
-> Scala 2 support is still available in [**spata 2**](https://github.com/fingo/spata/tree/spata2).
+> Scala 2 support is still available in [**spata 2**](https://github.com/sovt/spata/tree/spata2).
 
 The main goal of the library is to provide handy, functional, stream-based API
 with easy conversion between records and case classes, completed with precise information about possible flaws
@@ -41,7 +44,7 @@ spata 3 is available for Scala 3.x and requires at least Java 11.
 
 To use spata you have to add this single dependency to your `build.sbt`:
 ```sbt
-libraryDependencies += "info.fingo" %% "spata" % "<version>"
+libraryDependencies += "dev.sovt" %% "spata" % "<version>"
 ```
 The latest version may be found on the badge above.
 
@@ -56,8 +59,8 @@ import cats.syntax.traverse.given // to get list.sequence
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global  // default IORuntime
 import fs2.Stream
-import info.fingo.spata.CSVParser
-import info.fingo.spata.io.Reader
+import dev.sovt.spata.CSVParser
+import dev.sovt.spata.io.Reader
 
 case class Data(item: String, value: Double)
 val records = Stream
@@ -79,8 +82,8 @@ import java.nio.file.Paths
 import scala.io.Codec
 import cats.effect.{IO, IOApp}
 import fs2.Stream
-import info.fingo.spata.{CSVParser, CSVRenderer}
-import info.fingo.spata.io.{Reader, Writer}
+import dev.sovt.spata.{CSVParser, CSVRenderer}
+import dev.sovt.spata.io.{Reader, Writer}
 
 object Converter extends IOApp.Simple:
 
@@ -102,7 +105,7 @@ object Converter extends IOApp.Simple:
 Modified versions of this sample may be found in [error handling](#error-handling)
 and [schema validation](#schema-validation) parts of the tutorial.
 
-More examples of how to use the library may be found in `src/test/scala/info/fingo/sample/spata`.
+More examples of how to use the library may be found in `src/test/scala/dev/sovt/sample/spata`.
 
 Tutorial
 --------
@@ -280,7 +283,7 @@ val renderer = CSVRenderer.config.fieldDelimiter(';').noHeader.renderer[IO]
 ```
 
 Individual configuration parameters are described in
-`CSVConfig`'s [Scaladoc](https://javadoc.io/doc/info.fingo/spata_3/latest/info/fingo/spata/CSVConfig.html).
+`CSVConfig`'s [Scaladoc](https://javadoc.io/doc/dev.sovt/spata_3/latest/dev/sovt/spata/CSVConfig.html).
 
 A specific setting is the header mapping, available through `CSVConfig.mapHeader`.
 It allows replacing original header values with more convenient ones or even defining header if no one is present.
@@ -592,7 +595,7 @@ val value = record("melting")  // returns Some("13.99")
 This approach relies on `StringRenderer` for data formatting as well.
 It may be used even more comfortably by calling a method directly on case class:
 ```scala
-import info.fingo.spata.Record.ProductOps
+import dev.sovt.spata.Record.ProductOps
 val nf = NumberFormat.getInstance(new Locale("pl", "PL"))
 given StringRenderer[Double] = (v: Double) => nf.format(v)
 case class Element(symbol: String, melting: Double, boiling: Double)
@@ -894,7 +897,7 @@ Nevertheless, the validation is run independently for each field defined by the 
 The returned `InvalidRecord` contains error information from all incorrect fields.
 
 The validators are defined in terms of typed (already correctly parsed) values.
-A bunch of typical ones is available as part of `info.fingo.spata.schema.validator` package.
+A bunch of typical ones is available as part of `dev.sovt.spata.schema.validator` package.
 Additional ones may be provided by implementing the `schema.validator.Validator` trait.
 
 The converter example presented in [Basic usage](#basic-usage) may be improved to take advantage of schema validation:
@@ -904,9 +907,9 @@ import java.time.LocalDate
 import scala.io.Codec
 import cats.effect.{IO, IOApp}
 import fs2.Stream
-import info.fingo.spata.{CSVParser, CSVRenderer, Record}
-import info.fingo.spata.io.{Reader, Writer}
-import info.fingo.spata.schema.CSVSchema
+import dev.sovt.spata.{CSVParser, CSVRenderer, Record}
+import dev.sovt.spata.io.{Reader, Writer}
+import dev.sovt.spata.schema.CSVSchema
 
 object Converter extends IOApp.Simple:
 
@@ -982,8 +985,8 @@ import scala.util.Try
 import cats.data.Validated.{Invalid, Valid}
 import cats.effect.{ExitCode, IO, IOApp}
 import fs2.Stream
-import info.fingo.spata.{CSVParser, CSVRenderer, Record}
-import info.fingo.spata.io.{Reader, Writer}
+import dev.sovt.spata.{CSVParser, CSVRenderer, Record}
+import dev.sovt.spata.io.{Reader, Writer}
 
 object Converter extends IOApp:
 

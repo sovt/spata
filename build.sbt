@@ -1,8 +1,7 @@
 lazy val basicSettings = Seq(
-  organization := "info.fingo",
-  organizationName := "FINGO sp. z o.o.",
-  organizationHomepage := Some(url("http://fingo.info")),
-  homepage := Some(url("https://github.com/fingo/spata")),
+  organization := "dev.sovt",
+  organizationName := "sovt",
+  homepage := Some(url("https://github.com/sovt/spata")),
   startYear := Some(2020),
   name := "spata",
   description := "Functional, stream based CSV processor for Scala",
@@ -27,8 +26,6 @@ lazy val root = (project in file("."))
   .configs(PerformanceTest)
   .settings(
     versionScheme := Some("semver-spec"),
-    headerLicenseStyle := HeaderLicenseStyle.SpdxSyntax,
-    headerEmptyLine := false,
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-effect" % "3.6.0",
       "co.fs2" %% "fs2-core" % "3.12.0",
@@ -50,13 +47,23 @@ lazy val root = (project in file("."))
     scalacOptions ++= scalacSettings,
     Compile / console / scalacOptions --= Seq("-Xfatal-warnings"),
     Test / scalacOptions --= Seq("-Wnonunit-statement"),
-    mimaPreviousArtifacts := Set("info.fingo" %% "spata" % "3.2.0"),
+    mimaPreviousArtifacts := Set.empty,
     semanticdbEnabled := true,
     autoAPIMappings := true
   )
 
 lazy val licenseSettings = Seq(
   licenses += ("Apache-2.0", new URI("https://www.apache.org/licenses/LICENSE-2.0.txt").toURL),
+  headerLicense := Some(
+    HeaderLicense.Custom(
+      """|Copyright 2020-2025 FINGO sp. z o.o.
+        |Copyright 2025 sovt contributors
+        |
+        |SPDX-License-Identifier: Apache-2.0
+        |""".stripMargin
+    )
+  ),
+  headerEmptyLine := false,
   licenseCheckAllow := Seq(
     LicenseCategory.Apache,
     LicenseCategory.BouncyCastle,
@@ -67,7 +74,7 @@ lazy val licenseSettings = Seq(
     LicenseCategory.JSON,
     LicenseCategory.Unicode
   ),
-  developers := List(Developer("susuro", "Robert Marek", "robert.marek@fingo.info", url("https://github.com/susuro")))
+  developers := List(Developer("susuro", "Robert Marek", "robert@marek.net", url("https://github.com/susuro")))
 )
 
 lazy val scalacSettings = Seq(

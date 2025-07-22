@@ -1,0 +1,67 @@
+/*
+ * Copyright 2020-2025 FINGO sp. z o.o.
+ * Copyright 2025 sovt contributors
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+package dev.sovt.spata.parser
+
+import fs2.Chunk
+import fs2.Pipe
+
+import scala.annotation.tailrec
+import scala.collection.immutable.VectorBuilder
+
+import RecordParser.*
+import FieldParser.*
+
+/* Carrier for record number, partial record content and information about finished parsing. */
+final private[spata] case class StateRP(
+  recNum: Int = 1,
+  buffer: VectorBuilder[String] = new VectorBuilder[String](),
+  done: Boolean = false
+) extends State:
+  def finish: StateRP = copy(done = true)
+
+/* Converter from CSV fields to records. */
+final private[spata] class RecordParser[F[_]] extends ChunkAwareParser[F, FieldResult, RecordResult, StateRP]:
+
+  /* Transforms stream of fields into records by providing FS2 pipe. */
+  def toRecords: Pipe[F, FieldResult, RecordResult] = parse(StateRP())
+
+  @tailrec
+  override def parseChunk(
+    input: List[FieldResult],
+    output: Vector[RecordResult],
+    state: StateRP
+  ): (StateRP, Chunk[RecordResult]) =
+    input match
+      case (rf: RawField) :: tail if rf.endOfRecord =>
+        state.buffer += rf.value
+        val rr = RawRecord(state.buffer.result(), rf.counters, state.recNum)
+        if rr.isEmpty
+        then parseChunk(tail, output, StateRP(state.recNum))
+        else parseChunk(tail, output :+ rr, StateRP(state.recNum + 1))
+      case (rf: RawField) :: tail =>
+        state.buffer += rf.value
+        parseChunk(tail, output, StateRP(state.recNum, state.buffer))
+      case (ff: FieldFailure) :: _ =>
+        val fieldNum = state.buffer.result().size + 1
+        val chunk = Chunk.from(output :+ RecordFailure(ff.code, ff.counters, state.recNum, fieldNum))
+        (state.finish, chunk)
+      case _ => (state, Chunk.from(output))
+
+private[spata] object RecordParser:
+
+  import dev.sovt.spata.error.ParsingErrorCode.*
+
+  sealed trait RecordResult:
+    def location: Location
+    def recordNum: Int
+    def fieldNum: Int
+
+  case class RecordFailure(code: ErrorCode, location: Location, recordNum: Int, fieldNum: Int) extends RecordResult
+
+  case class RawRecord(fields: IndexedSeq[String], location: Location, recordNum: Int) extends RecordResult:
+    def isEmpty: Boolean = fields.isEmpty || fields.size == 1 && fields.head.isEmpty
+    def fieldNum: Int = fields.size

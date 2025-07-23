@@ -53,7 +53,7 @@ Cutting a release
 
 A release process uses [sbt-dynver](https://github.com/dwijnand/sbt-dynver) and is triggered by Git tag:
 *   Set a tag: `git tag -a v<version> -m <info>`.
-*   Push it: `git push --tags`.
+*   Push it: `git push --follow-tags`.
 
 After this, draft a new release in [GitHub](https://github.com/sovt/spata/releases).
 

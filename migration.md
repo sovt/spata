@@ -1,52 +1,45 @@
 Migration notes
 ===============
 
-This file described changes to be made while upgrading **spata** between incompatible versions.  
+This file described changes to be made while upgrading **spata** between incompatible versions.
 
-Upgrading to 2.x from 1.x
+Upgrading to 4.x from 3.x
 -------------------------
 
-**spata 2** introduces rendering functionality.
-Some changes to API were required to keep parsing and rendering in pair with each other.
-Others were made to improve the API taking the opportunity of already broken compatibility.
+**spata** has been transferred from `FINGO` to `sovt` organization, causing changes in package namespace and sbt coordinates.
+License and contribution information have been updated accordingly
 
-### Configuration
+### sbt build file adjustment
 
-*   Call `parser[F]` instead of `get[F]()` to create parser for given configuration.
-*   Omit parentheses in calls to `noHeader` and `stripSpaces` methods.
-  
-E.g. instead of
-```scala
-val parser = CSVConfig().noHeader().get[IO]()
+Replace
+```sbt
+libraryDependencies += "info.fingo" %% "spata" % "<version>"
 ```
-write
-```scala
-val parser = CSVConfig().noHeader.parser[IO]
+with
+```sbt
+libraryDependencies += "dev.sovt" %% "spata" % "<version>"
 ```
+The latest version may be found on the badge in the readme file.
 
-### Parsing
+### Import changes
 
-*   Omit parentheses while calling `CSVParser.apply` (e.g. `CSVParser[IO]`).
-
-### Reading data
-
-*   Replace `io.reader` object with `io.Reader`.
-*   Omit parentheses in calls to `apply`, `plain`, and `shifting`.
-
-E.g. instead of
-```scala
-val stream = reader[IO]().read(Paths.get("source.csv"))
+All imports
+```Scala
+import info.fingo.spata.Foo
 ```
-write
-```scala
-val stream = Reader[IO].read(Paths.get("source.csv"))
+have to be changed to
+```Scala
+import dev.sovt.spata.Foo
 ```
 
-### Miscellaneous
+### License and Attribution Considerations
 
-*   Methods with arity-0 have been stripped of parentheses where feasible because they do not have side effects.
-*   Many classes and traits have been declared final or sealed.
-*   `Reader` trait has been moved from `reader` object into `io` package.
+The license text remains unchanged, but attribution should reflect the new maintainers:
+
+```text
+Copyright 2020–2025 FINGO sp. z o.o.
+Copyright 2025 sovt contributors
+```
 
 Upgrading to 3.x from 2.x
 -------------------------
@@ -62,7 +55,7 @@ Second, Cats Effect 3 introduced breaking changes, which in turn made FS2 v3 inc
 This required changes in the areas involving effect handling, concurrency and io.
 
 spata 3 has been fully ported to Scala 3, adapting new constructs and braceless style.
-spata 2 is being maintained on [seprate branch](https://github.com/fingo/spata/tree/spata2).
+spata 2 is being maintained on [seprate branch](https://github.com/sovt/spata/tree/spata2).
 
 ### Record conversion
 
@@ -105,7 +98,7 @@ Thread pool assigment for blocking io is handled by runtime based on information
 For more information about new threading model for io and the ways to control this behavior see
 [Cats Effect 3 migration guide](https://typelevel.org/cats-effect/docs/migration-guide#blocker).
 
-This removal simplifies the `Reader.Shifting` and `Writer.Shifting` APIs - 
+This removal simplifies the `Reader.Shifting` and `Writer.Shifting` APIs -
 no blocker is provided as a parameter anymore. Instead of
 ```scala
 Stream.resource(Blocker[IO]).flatMap { blocker =>
@@ -135,3 +128,48 @@ as in this case this modified default behaviour may negatively influnce performa
 *   As a consequence of replacing `implicit` with `given`/`using`,
     if any implicit method argument is provided explicitly,
     it has to be preceded by `using` keyword.
+
+Upgrading to 2.x from 1.x
+-------------------------
+
+**spata 2** introduces rendering functionality.
+Some changes to API were required to keep parsing and rendering in pair with each other.
+Others were made to improve the API taking the opportunity of already broken compatibility.
+
+### Configuration
+
+*   Call `parser[F]` instead of `get[F]()` to create parser for given configuration.
+*   Omit parentheses in calls to `noHeader` and `stripSpaces` methods.
+
+E.g. instead of
+```scala
+val parser = CSVConfig().noHeader().get[IO]()
+```
+write
+```scala
+val parser = CSVConfig().noHeader.parser[IO]
+```
+
+### Parsing
+
+*   Omit parentheses while calling `CSVParser.apply` (e.g. `CSVParser[IO]`).
+
+### Reading data
+
+*   Replace `io.reader` object with `io.Reader`.
+*   Omit parentheses in calls to `apply`, `plain`, and `shifting`.
+
+E.g. instead of
+```scala
+val stream = reader[IO]().read(Paths.get("source.csv"))
+```
+write
+```scala
+val stream = Reader[IO].read(Paths.get("source.csv"))
+```
+
+### Miscellaneous
+
+*   Methods with arity-0 have been stripped of parentheses where feasible because they do not have side effects.
+*   Many classes and traits have been declared final or sealed.
+*   `Reader` trait has been moved from `reader` object into `io` package.

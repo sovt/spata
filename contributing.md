@@ -7,7 +7,7 @@ How to help
 -----------
 
 Different kinds of contributions are welcome, including, but not limited to:
-*   improvements in the documentation - scope, accuracy, clarity and language, 
+*   improvements in the documentation - scope, accuracy, clarity and language,
 *   providing additional examples on how to use the library,
 *   reporting and fixing bugs,
 *   refactoring existing code and enhancing tests,
@@ -20,7 +20,7 @@ Proposing and submitting a change
 
 If you would like to make any changes to the project, please:
 
-*   let us know about this by commenting on an existing [issue](https://github.com/fingo/spata/issues)
+*   let us know about this by commenting on an existing [issue](https://github.com/sovt/spata/issues)
     or creating a new one and describing your idea,
 
 *   fork and build the project,
@@ -31,7 +31,7 @@ If you would like to make any changes to the project, please:
 
 *   submit a [pull request](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request-from-a-fork).
 
-spata follows a standard [fork and pull](https://guides.github.com/activities/forking/) model for contributions. 
+spata follows a standard [fork and pull](https://guides.github.com/activities/forking/) model for contributions.
 
 ### Building the project
 
@@ -68,7 +68,7 @@ sbt -mem 2048 clean check doc test mimaReportBinaryIssues perf:test
 
 Grant of license
 ----------------
-spata is licensed under [Apache-2.0](https://github.com/fingo/spata/blob/master/LICENSE).
+spata is licensed under [Apache-2.0](https://github.com/sovt/spata/blob/master/LICENSE).
 Opening a pull request implies your consent to license your contribution under Apache License 2.0.
 
 Attributions

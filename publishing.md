@@ -14,7 +14,7 @@ Preparations
 
 *   Create personal Sonatype repository account through [Sonatype Central](https://central.sonatype.com/api/auth/login).
 
-*   Claim access to `fingo.info` domain through [Publish Settings](https://central.sonatype.com/publishing/namespaces).
+*   Claim access to `sovt.dev` domain through [Publish Settings](https://central.sonatype.com/publishing/namespaces).
 
 *   Create a user toke through [Account](https://central.sonatype.com/account).
 
@@ -24,7 +24,7 @@ Preparations
 
 *   Generate a key pair: `gpg --gen-key`:
     *   provide `spata bot` as name,
-    *   provide your personal email (optimally in `fingo.info` domain).
+    *   provide your personal email (optimally in `sovt.dev` domain).
 
 *   Note the key id for later use.
 
@@ -36,17 +36,17 @@ Preparations
 ### Configure Github Actions
 
 *   Add Sonatype token (`SONATYPE_USERNAME` and `SONATYPE_PASSWORD`) to
-    [Github repository secrets](https://github.com/fingo/spata/settings/secrets/actions)
+    [Github repository secrets](https://github.com/sovt/spata/settings/secrets/actions)
 
 *   Retrieve the PGP key: `gpg --armor --export-secret-keys <key-id> | base64 | pbcopy`
     (this is MacOS specific command, for other platforms see
     [Library Author Guide](https://docs.scala-lang.org/overviews/contributors/index.html#export-your-pgp-key-pair))
 
 *   Add PGP key (`PGP_SECRET`) to
-    [Github repository secrets](https://github.com/fingo/spata/settings/secrets/actions)
+    [Github repository secrets](https://github.com/sovt/spata/settings/secrets/actions)
 
 *   Add PGP key passphrase (`PGP_PASSPHRASE`) to
-    [Github repository secrets](https://github.com/fingo/spata/settings/secrets/actions)
+    [Github repository secrets](https://github.com/sovt/spata/settings/secrets/actions)
 
 Cutting a release
 -----------------
@@ -55,7 +55,7 @@ A release process uses [sbt-dynver](https://github.com/dwijnand/sbt-dynver) and 
 *   Set a tag: `git tag -a v<version> -m <info>`.
 *   Push it: `git push --tags`.
 
-After this, draft a new release in [GitHub](https://github.com/fingo/spata/releases).
+After this, draft a new release in [GitHub](https://github.com/sovt/spata/releases).
 
 Revoking keys
 -------------

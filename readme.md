@@ -3,8 +3,8 @@ spata
 
 [![Build Status](https://github.com/sovt/spata/actions/workflows/ci.yaml/badge.svg)](https://github.com/sovt/spata/actions/workflows/ci.yaml)
 [![Code Coverage](https://codecov.io/gh/sovt/spata/branch/master/graph/badge.svg)](https://codecov.io/gh/sovt/spata)
-[![Maven Central](https://img.shields.io/maven-central/v/info.fingo/spata_3.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22info.fingo%22%20AND%20a:%22spata_3%22)
-[![Scala Doc](https://javadoc.io/badge2/info.fingo/spata_3/javadoc.svg)](https://javadoc.io/doc/info.fingo/spata_3/latest/info/fingo/spata/index.html)
+[![Maven Central](https://img.shields.io/maven-central/v/dev.sovt/spata_3)](https://central.sonatype.com/artifact/dev.sovt/spata_3)
+[![Scala Doc](https://javadoc.io/badge2/dev.sovt/spata_3/javadoc.svg)](https://javadoc.io/doc/dev.sovt/spata_3/latest/index.html)
 [![Gitter](https://badges.gitter.im/fingo-spata/community.svg)](https://gitter.im/fingo-spata/community)
 
 > [!IMPORTANT]

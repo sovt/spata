@@ -47,7 +47,7 @@ lazy val root = (project in file("."))
     scalacOptions ++= scalacSettings,
     Compile / console / scalacOptions --= Seq("-Xfatal-warnings"),
     Test / scalacOptions --= Seq("-Wnonunit-statement"),
-    mimaPreviousArtifacts := Set.empty,
+    mimaPreviousArtifacts := Set("dev.sovt" %% "spata" % "4.0.0"),
     semanticdbEnabled := true,
     autoAPIMappings := true
   )

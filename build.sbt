@@ -46,6 +46,7 @@ lazy val root = (project in file("."))
     javaOptions += "-Dfile.encoding=UTF-8",
     scalacOptions ++= scalacSettings,
     Compile / console / scalacOptions --= Seq("-Xfatal-warnings"),
+    Compile / doc / scalacOptions := Nil,
     Test / scalacOptions --= Seq("-Wnonunit-statement"),
     mimaPreviousArtifacts := Set("dev.sovt" %% "spata" % "4.0.0"),
     semanticdbEnabled := true,

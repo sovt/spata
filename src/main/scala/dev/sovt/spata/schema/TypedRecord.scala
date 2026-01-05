@@ -63,7 +63,7 @@ final class TypedRecord[KS <: Tuple, VS <: Tuple] private (
     * @tparam K the key type - this is a singleton type representing the key
     * @return field value
     */
-  def apply[K <: Key](key: K): Select[K, KS, VS] = get(key, keys, values)
+  def apply[K <: Key](key: K): Select[key.type, KS, VS] = get(key, keys, values)
 
   /** Converts typed record to a case class.
     *
@@ -90,7 +90,7 @@ final class TypedRecord[KS <: Tuple, VS <: Tuple] private (
     ev: Tuple.Union[Tuple.Zip[m.MirroredElemLabels, m.MirroredElemTypes]] <:< Tuple.Union[Tuple.Zip[KS, VS]]
   ): P =
     val labels = ToProduct.getLabels[m.MirroredElemLabels]
-    val vals = labels.map(l => get(l, keys, values))
+    val vals: List[Any] = labels.map(l => get(l, keys, values))
     m.fromProduct(Tuple.fromArray(vals.toArray))
 
   /* Gets value from `values` matching the `key` from `keys`.
@@ -98,17 +98,17 @@ final class TypedRecord[KS <: Tuple, VS <: Tuple] private (
    * This method  and `getT` call each other alternately to reduce keys and values accordingly.
    * This is a dependently typed method corresponding to `Select` match type.
    */
-  private def get[K <: Key, KS <: Tuple, VS <: Tuple](key: K, keys: KS, values: VS): Select[K, KS, VS] =
+  private def get[K <: Key, KS <: Tuple, VS <: Tuple](key: K, keys: KS, values: VS): Select[key.type, KS, VS] =
     val selected = (keys: @unchecked) match
       case `key` *: _ => getH(values)
       case _ *: tk => getT(key, tk, values)
-    selected.asInstanceOf[Select[K, KS, VS]]
+    selected.asInstanceOf[Select[key.type, KS, VS]]
 
   /* Gets value from `values` matching the `key` from `keys`.
    * This method and `get` call each other alternately to reduce values and keys accordingly.
    * This is a dependently typed method corresponding to `SelectT` match type.
    */
-  private def getT[K <: Key, KS <: Tuple, VS <: Tuple](key: K, keys: KS, values: VS): SelectT[K, KS, VS] =
+  private def getT[K <: Key, KS <: Tuple, VS <: Tuple](key: K, keys: KS, values: VS): SelectT[key.type, KS, VS] =
     (values: @unchecked) match
       case vs: (h *: t) => get(key, keys, vs.tail[h *: t])
 

@@ -60,7 +60,7 @@ class WriterTS extends AnyFunSuite with TableDrivenPropertyChecks:
     val charset = Charset.forName("windows-1250")
     given codec: Codec(charset)
     val relevantCases = testCases.filter(_(0) != "extended chars") // not supported by encoding
-    forAll(relevantCases): (testCase: String, data: String) =>
+    forAll(relevantCases): (_: String, data: String) =>
       forAll(writers): (_: String, writer: Writer[IO]) =>
         val os = new ByteArrayOutputStream()
         val fos = IO[OutputStream](os)

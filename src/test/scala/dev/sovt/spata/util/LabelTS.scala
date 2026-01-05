@@ -29,4 +29,5 @@ class LabelTS extends AnyFunSuite:
 
     object Context:
       trait Anonymous
-      assert(classLabel(new Anonymous() {}) == "context")
+      val cl = classLabel(new Anonymous() {})
+    assert(Context.cl == "context")

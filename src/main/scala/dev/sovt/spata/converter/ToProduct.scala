@@ -88,6 +88,6 @@ object ToProduct:
     elements: List[(String, StringParser[?])]
   ): ToProduct[T] =
     (r: Record) =>
-      val instance = for (label, parser) <- elements yield r.get(label)(parser)
+      val instance = for (label, parser) <- elements yield r.get(label)(using parser)
       val (left, right) = instance.partitionMap(identity)
       left.headOption.toLeft(p.fromProduct(Tuple.fromArray(right.toArray)))

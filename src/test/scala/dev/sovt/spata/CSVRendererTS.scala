@@ -42,7 +42,7 @@ class CSVRendererTS extends AnyFunSuite with TableDrivenPropertyChecks:
       forAll(headerModes): headerMode =>
         forAll(escapeModes): escapeMode =>
           val relevantCases = testCases.filter(_(3).contains(headerMode))
-          forAll(relevantCases): (_: String, headerCase: String, contentCase: String, headerModes: List[String]) =>
+          forAll(relevantCases): (_: String, headerCase: String, contentCase: String, _: List[String]) =>
             val hdr = header(headerCase)
             val recs = records(contentCase, separator, hdr)
             val renderer = config(separator, escapeMode, headerMode).renderer[IO]
@@ -57,7 +57,7 @@ class CSVRendererTS extends AnyFunSuite with TableDrivenPropertyChecks:
       forAll(headerModes): headerMode =>
         forAll(escapeModes): escapeMode =>
           val relevantCases = testCases.filter(_(3).contains(headerMode))
-          forAll(relevantCases): (_: String, headerCase: String, contentCase: String, headerModes: List[String]) =>
+          forAll(relevantCases): (_: String, headerCase: String, contentCase: String, _: List[String]) =>
             val hdr = header(headerCase)
             val clss = classes(contentCase, separator)
             val renderer = config(separator, escapeMode, headerMode).renderer[IO]
@@ -85,7 +85,7 @@ class CSVRendererTS extends AnyFunSuite with TableDrivenPropertyChecks:
       forAll(headerModes): headerMode => // header mode must not influence row creation
         forAll(escapeModes): escapeMode =>
           val relevantCases = testCases.filter(_(3).contains(headerMode))
-          forAll(relevantCases): (_: String, _: String, contentCase: String, headerModes: List[String]) =>
+          forAll(relevantCases): (_: String, _: String, contentCase: String, _: List[String]) =>
             val recs = records(contentCase, separator)
             val renderer = config(separator, escapeMode, headerMode).renderer[IO]
             val stream = Stream(recs*).covaryAll[IO, Record]
@@ -102,7 +102,7 @@ class CSVRendererTS extends AnyFunSuite with TableDrivenPropertyChecks:
       forAll(headerModes): headerMode =>
         forAll(escapeModes): escapeMode =>
           val relevantCases = testCases.filter(_(3).contains(headerMode))
-          forAll(relevantCases): (_: String, headerCase: String, contentCase: String, headerModes: List[String]) =>
+          forAll(relevantCases): (_: String, headerCase: String, contentCase: String, _: List[String]) =>
             val os = new ByteArrayOutputStream()
             val hdr = header(headerCase)
             val recs = records(contentCase, separator, hdr)
@@ -115,12 +115,11 @@ class CSVRendererTS extends AnyFunSuite with TableDrivenPropertyChecks:
 
   test("renderer converted data should allow integration with fs2 io"):
     val charset = Charset.forName("ISO-8859-2")
-    given codec: Codec(charset)
     forAll(separators): separator =>
       forAll(headerModes): headerMode =>
         forAll(escapeModes): escapeMode =>
           val relevantCases = testCases.filter(_(3).contains(headerMode))
-          forAll(relevantCases): (_: String, headerCase: String, contentCase: String, headerModes: List[String]) =>
+          forAll(relevantCases): (_: String, headerCase: String, contentCase: String, _: List[String]) =>
             val os = new ByteArrayOutputStream()
             val hdr = header(headerCase)
             val recs = records(contentCase, separator, hdr)
@@ -140,7 +139,7 @@ class CSVRendererTS extends AnyFunSuite with TableDrivenPropertyChecks:
         forAll(escapeModes): escapeMode =>
           forAll(headerMappings): mappedConfig =>
             val relevantCases = testCases.filter(_(3).contains(headerMode))
-            forAll(relevantCases): (_: String, headerCase: String, contentCase: String, headerModes: List[String]) =>
+            forAll(relevantCases): (_: String, headerCase: String, contentCase: String, _: List[String]) =>
               val hdr = header(headerCase)
               val recs = records(contentCase, separator, hdr)
               val renderer = config(separator, escapeMode, headerMode, mappedConfig.headerMap).renderer[IO]

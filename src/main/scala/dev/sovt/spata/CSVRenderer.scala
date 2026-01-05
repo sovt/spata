@@ -8,7 +8,6 @@ package dev.sovt.spata
 
 import dev.sovt.spata.error.FieldInfo
 import dev.sovt.spata.error.HeaderError
-import fs2.Chunk
 import fs2.Pipe
 import fs2.Pull
 import fs2.RaiseThrowable

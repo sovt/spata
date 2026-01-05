@@ -10,6 +10,7 @@ import cats.effect.Sync
 import dev.sovt.spata.util.Logger
 
 import scala.annotation.targetName
+import scala.annotation.unused
 
 /** CSV configuration used to create [[CSVParser]] or [[CSVRenderer]].
   *
@@ -166,6 +167,7 @@ final case class CSVConfig private[spata] (
     * (typically [[cats.effect.IO]]) and logging (provided internally by spata)
     * @return renderer configured according to provided settings
     */
+  @unused // becuase of Logger; TODO: Logger should be removed but is kept for compatibility
   def renderer[F[_]: Sync: Logger]: CSVRenderer[F] = new CSVRenderer(this)
 
   /** Provides configuration description

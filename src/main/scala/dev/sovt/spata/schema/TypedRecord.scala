@@ -10,7 +10,6 @@ import dev.sovt.spata.converter.ToProduct
 import dev.sovt.spata.schema.TypedRecord.*
 
 import scala.annotation.unused
-import scala.compiletime.constValue
 import scala.deriving.Mirror
 
 /** CSV record representation with type-safe access to its values.

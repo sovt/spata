@@ -11,6 +11,7 @@ import dev.sovt.spata.Record
 import dev.sovt.spata.text.StringParser
 
 import scala.compiletime.constValue
+import scala.compiletime.constValueTuple
 import scala.compiletime.erasedValue
 import scala.compiletime.summonInline
 import scala.deriving.Mirror
@@ -32,6 +33,21 @@ trait ToTuple[+T <: Tuple]:
 
   /* Converts record to tuple starting at given index. */
   private[converter] def decodeAt(r: Record, pos: Int): Decoded[T]
+
+/** Converter from a record to a named tuple.
+  *
+  * This trait defines behavior to be implemented by concrete, given converters.
+  *
+  * @tparam T type of target named tuple
+  */
+trait ToNamedTuple[+T <: NamedTuple.AnyNamedTuple]:
+
+  /** Converts record to named tuple.
+    *
+    * @param r record to be converted.
+    * @return either converted named tuple or an exception.
+    */
+  def decode(r: Record): Decoded[T]
 
 /** Converter from a record to a product (case class).
   *
@@ -62,6 +78,28 @@ object ToTuple:
         h <- r.get(pos)
         t <- summon[ToTuple[T]].decodeAt(r, pos + 1)
       yield h *: t
+
+object ToNamedTuple:
+
+  /** Given instance for converter from record product (case class). */
+  inline given toNamedTuple[T <: NamedTuple.AnyNamedTuple]: ToNamedTuple[T] =
+    val labels = constValueTuple[NamedTupleDecomposition.Names[T]].toList.map(_.toString)
+    val types = getTypes[NamedTupleDecomposition.DropNames[T]]
+    decodeNamedTuple(labels.zip(types))
+
+  private inline def getTypes[T <: Tuple]: List[StringParser[?]] = inline erasedValue[T] match
+    case _: EmptyTuple => Nil
+    case _: (t *: ts) => summonInline[StringParser[t]] :: getTypes[ts]
+
+  private def decodeNamedTuple[T <: NamedTuple.AnyNamedTuple](
+    elements: List[(String, StringParser[?])]
+  ): ToNamedTuple[T] =
+    type TN = NamedTupleDecomposition.Names[T]
+    type TV = NamedTupleDecomposition.DropNames[T]
+    (r: Record) =>
+      val instance = for (label, parser) <- elements yield r.get(label)(using parser)
+      val (left, right) = instance.partitionMap(identity)
+      left.headOption.toLeft(NamedTuple[TN, TV](Tuple.fromArray(right.toArray).asInstanceOf[TV]).asInstanceOf[T])
 
 /** `ToProduct` companion object with given instance of record to product converter. */
 object ToProduct:

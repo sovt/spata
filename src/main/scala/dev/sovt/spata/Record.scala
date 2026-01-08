@@ -8,6 +8,7 @@ package dev.sovt.spata
 
 import dev.sovt.spata.converter.FromProduct
 import dev.sovt.spata.converter.FromTuple
+import dev.sovt.spata.converter.ToNamedTuple
 import dev.sovt.spata.converter.ToProduct
 import dev.sovt.spata.converter.ToTuple
 import dev.sovt.spata.error.*
@@ -184,6 +185,16 @@ final class Record private (val values: IndexedSeq[String], val position: Option
     * @return either converted tuple or an error
     */
   def to[T <: Tuple: ToTuple]: Decoded[T] = summon[ToTuple[T]].decode(this)
+
+  /** Converts this record to [[scala.NamedTuple.NamedTuple]].
+    *
+    * @tparam T the [[scala.NamedTuple.NamedTuple]] type to converter this record to,
+    * with given type class providing support for conversion (arranged internally by spata,
+    * assuming `StringParser` is available for all named tuple field types)
+    * @return either converted named tuple or an error
+    */
+  def toNT[T <: NamedTuple.AnyNamedTuple: ToNamedTuple]: Decoded[T] =
+    summon[ToNamedTuple[T]].decode(this)
 
   /** Gets field value.
     *

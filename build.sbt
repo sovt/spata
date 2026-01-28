@@ -5,7 +5,7 @@ lazy val basicSettings = Seq(
   startYear := Some(2020),
   name := "spata",
   description := "Functional, stream based CSV processor for Scala",
-  scalaVersion := "3.3.6"
+  scalaVersion := "3.3.7"
 )
 
 addCommandAlias("check", "; scalafmtCheck ; scalafix --check")
@@ -27,9 +27,9 @@ lazy val root = (project in file("."))
   .settings(
     versionScheme := Some("semver-spec"),
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-effect" % "3.6.0",
-      "co.fs2" %% "fs2-core" % "3.12.0",
-      "co.fs2" %% "fs2-io" % "3.12.0",
+      "org.typelevel" %% "cats-effect" % "3.6.3",
+      "co.fs2" %% "fs2-core" % "3.12.2",
+      "co.fs2" %% "fs2-io" % "3.12.2",
       "org.slf4j" % "slf4j-api" % "2.0.17",
       "org.scalatest" %% "scalatest" % "3.2.19" % Test,
       (("com.storm-enroute" %% "scalameter" % "0.21").cross(CrossVersion.for3Use2_13) % Test)
@@ -47,7 +47,7 @@ lazy val root = (project in file("."))
     scalacOptions ++= scalacSettings,
     Compile / console / scalacOptions --= Seq("-Xfatal-warnings"),
     Compile / doc / scalacOptions := Nil,
-    Test / scalacOptions --= Seq("-Wnonunit-statement"),
+    Test / scalacOptions --= Seq("-Wnonunit-statement", "-Wunused:all"), // https://github.com/scala/scala3/issues/24665
     mimaPreviousArtifacts := Set("dev.sovt" %% "spata" % "4.0.0"),
     semanticdbEnabled := true,
     autoAPIMappings := true

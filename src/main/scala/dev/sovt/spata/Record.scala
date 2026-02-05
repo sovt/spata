@@ -8,7 +8,7 @@ package dev.sovt.spata
 
 import dev.sovt.spata.converter.FromProduct
 import dev.sovt.spata.converter.FromTuple
-import dev.sovt.spata.converter.ToNamedTuple
+import dev.sovt.spata.converter.RecordDecoder
 import dev.sovt.spata.converter.ToProduct
 import dev.sovt.spata.converter.ToTuple
 import dev.sovt.spata.error.*
@@ -18,6 +18,7 @@ import dev.sovt.spata.text.StringParser
 import dev.sovt.spata.text.StringRenderer
 
 import java.util.NoSuchElementException
+import scala.annotation.targetName
 
 /** CSV record representation.
   * A record is basically a map from string to string.
@@ -84,7 +85,7 @@ final class Record private (val values: IndexedSeq[String], val position: Option
     */
   def get[A]: Field[A] = new Field[A]
 
-  /** Converts this record to [[scala.Product]], e.g. case class.
+  /** Converts this record to tuple, named tuple or case class.
     *
     * For example:
     * ```
@@ -99,18 +100,27 @@ final class Record private (val values: IndexedSeq[String], val position: Option
     * case class Person(name: String, born: LocalDate, died: Option[LocalDate])
     * val person: Decoded[Person] = record.to[Person]
     * ```
+    * For named tuples the case class definition should be replaced with
+    * ```
+    * type Person = (name: String, born: LocalDate, died: Option[LocalDate])
+    * ```
     *
-    * Please note, that the conversion for case classes is name-based
-    * (case class field names have to match record (CSV) header) and is case sensitive.
+    * Please note that the conversion for case classes and named tuples is name-based
+    * (case class / name tuple field names have to match record (CSV) header) and is case sensitive.
     * The order of fields does not matter.
-    * Case class may be narrower and effectively retrieve only a subset of record's fields.
+    * Case class / named tuple may be narrower and effectively retrieve only a subset of record's fields.
     *
-    * It is possible to use a tuple instead of case class - see the tuple-optimized version of [[to]].
+    * For tuples the case class definition in above example should be replaced with
+    * ```
+    * type Person = (String, LocalDate, Option[LocalDate])
+    * ```
+    * The conversion to tuples is index-based and header names are not taken into account.
+    * Tuple may be narrower and effectively retrieve only the initial subsequence of record's fields.
     *
     * Current implementation supports only shallow conversion -
     * each product field has to be retrieved from single record field through [[text.StringParser StringParser]].
     *
-    * Because conversion to product requires parsing of all fields through [[text.StringParser StringParser]],
+    * Because this conversion requires parsing of all fields through [[text.StringParser StringParser]],
     * there is no way to provide custom formatter, like while using [[get[A]:* get]] method.
     * If other then the default formatting has to be handled,
     * a custom given instance `stringParser` has to be provided:
@@ -129,72 +139,26 @@ final class Record private (val values: IndexedSeq[String], val position: Option
     * val person: Decoded[Person] = record.to[Person]
     * ```
     *
-    * @tparam P the [[scala.Product]] type to converter this record to,
+    * @tparam T the tuple / named tuple / case class type to converter this record to,
     * with given type class providing support for conversion (arranged internally by spata,
-    * assuming `StringParser` is available for all product field types)
-    * @return either converted product or an error
+    * assuming `StringParser` is available for all field types)
+    * @return either converted tuple / class or an error
     */
-  def to[P <: Product: ToProduct]: Decoded[P] = summon[ToProduct[P]].decode(this)
+  def to[T: RecordDecoder]: Decoded[T] = summon[RecordDecoder[T]].decode(this)
 
-  /** Converts this record to [[scala.Tuple]].
-    * Althogh the product conversion [[to]] method works for tuples too,
-    * this tuple-optimized version is more efficient.
-    *
-    * For example:
-    * ```
-    * // Assume following CSV source
-    * // ----------------
-    * // name,born,died
-    * // Nicolaus Copernicus,1473-02-19,1543-05-24
-    * // Johannes Hevelius,1611-01-28,
-    * // ----------------
-    * // and a Record created based on it
-    * val record: Record = ???
-    * tyoe T3 = (String, LocalDate, Option[LocalDate])
-    * val person: Decoded[T3] = record.to[T3]
-    * ```
-    *
-    * Please note, that the conversion to tuples is index-based and header names are not taken into account.
-    * Tuple may be narrower and effectively retrieve only an initial subset of record's fields.
-    *
-    * Current implementation supports only shallow conversion -
-    * each tuple field has to be retrieved from single record field through [[text.StringParser StringParser]].
-    *
-    * Because conversion to tuple requires parsing of all fields through [[text.StringParser StringParser]],
-    * there is no way to provide custom formatter, like while using [[get[A]:* get]] method.
-    * If other then the default formatting has to be handled,
-    * a custom given instnce of `stringParser` has to be provided:
-    * ```
-    * // Assume following CSV source
-    * // ----------------
-    * // name,born,died
-    * // Nicolaus Copernicus,19.02.1473,24.05.1543
-    * // Johannes Hevelius,28.01.1611,
-    * // ----------------
-    * // and a Record created based on it
-    * val record: Record = ???
-    * tyoe T3 = (String, LocalDate, Option[LocalDate])
-    * given ldsp: StringParser[LocalDate] with
-    *   def apply(str: String) = LocalDate.parse(str.strip, DateTimeFormatter.ofPattern("dd.MM.yyyy"))
-    * val person: Decoded[T3] = record.to[T3]
-    * ```
-    *
-    * @tparam T the [[scala.Tuple]] type to converter this record to,
-    * with given type class providing support for conversion (arranged internally by spata,
-    * assuming `StringParser` is available for all tuple field types)
-    * @return either converted tuple or an error
-    */
-  def to[T <: Tuple: ToTuple]: Decoded[T] = summon[ToTuple[T]].decode(this)
+  /* Converts this record to case class.
+   * This method is depracated in favor of more generic [[to]] and provided for binary compatibility only.
+   */
+  @deprecated("Provided for binary compatibility, use [[to]] instead")
+  @targetName("to") // for binary compatibility
+  private[spata] def toCaseClass[P <: Product: ToProduct]: Decoded[P] = summon[ToProduct[P]].decode(this)
 
-  /** Converts this record to [[scala.NamedTuple.NamedTuple]].
-    *
-    * @tparam T the [[scala.NamedTuple.NamedTuple]] type to converter this record to,
-    * with given type class providing support for conversion (arranged internally by spata,
-    * assuming `StringParser` is available for all named tuple field types)
-    * @return either converted named tuple or an error
-    */
-  def toNT[T <: NamedTuple.AnyNamedTuple: ToNamedTuple]: Decoded[T] =
-    summon[ToNamedTuple[T]].decode(this)
+  /* Converts this record to tuple.
+   * This method is depracated in favor of more generic [[to]] and provided for binary compatibility only.
+   */
+  @deprecated("Provided for binary compatibility, use [[to]] instead")
+  @targetName("to") // for binary compatibility
+  private[spata] def toTuple[T <: Tuple: ToTuple]: Decoded[T] = summon[ToTuple[T]].decode(this)
 
   /** Gets field value.
     *

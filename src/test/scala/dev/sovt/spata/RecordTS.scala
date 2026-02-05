@@ -176,10 +176,11 @@ class RecordTS extends AnyFunSuite with TableDrivenPropertyChecks:
 
   test("record may be converted to named tuples"):
     type Data = (name: String, value: BigDecimal, date: LocalDate)
+    type Person = (name: String, born: LocalDate, died: Option[LocalDate])
     val header = Header("name", "date", "value")
     forAll(basicCases): (_: String, name: String, sDate: String, sValue: String) =>
       val record = createRecord(name, sDate, sValue)(header)
-      val md = record.toNT[Data]
+      val md = record.to[Data]
       assert(md.isRight)
       assert(md.contains((name, value, date)))
 

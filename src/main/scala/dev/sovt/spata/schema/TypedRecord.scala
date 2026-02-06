@@ -6,10 +6,10 @@
  */
 package dev.sovt.spata.schema
 
-import dev.sovt.spata.converter.ToProduct
 import dev.sovt.spata.schema.TypedRecord.*
 
 import scala.annotation.unused
+import scala.compiletime.constValueTuple
 import scala.deriving.Mirror
 
 /** CSV record representation with type-safe access to its values.
@@ -89,7 +89,7 @@ final class TypedRecord[KS <: Tuple, VS <: Tuple] private (
     m: Mirror.ProductOf[P],
     ev: Tuple.Union[Tuple.Zip[m.MirroredElemLabels, m.MirroredElemTypes]] <:< Tuple.Union[Tuple.Zip[KS, VS]]
   ): P =
-    val labels = ToProduct.getLabels[m.MirroredElemLabels]
+    val labels = constValueTuple[m.MirroredElemLabels].toList.map(_.toString)
     val vals: List[Any] = labels.map(l => get(l, keys, values))
     m.fromProduct(Tuple.fromArray(vals.toArray))
 

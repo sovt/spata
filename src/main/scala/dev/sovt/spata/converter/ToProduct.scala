@@ -10,7 +10,6 @@ import dev.sovt.spata.Decoded
 import dev.sovt.spata.Record
 import dev.sovt.spata.text.StringParser
 
-import scala.compiletime.constValue
 import scala.compiletime.constValueTuple
 import scala.compiletime.erasedValue
 import scala.compiletime.summonInline
@@ -79,46 +78,30 @@ object ToTuple:
         t <- summon[ToTuple[T]].decodeAt(r, pos + 1)
       yield h *: t
 
-object ToNamedTuple:
+object ToNamedTuple extends ToLabeled:
 
   /** Given instance for converter from record product (case class). */
   inline given toNamedTuple[T <: NamedTuple.AnyNamedTuple]: ToNamedTuple[T] =
-    val labels = constValueTuple[NamedTupleDecomposition.Names[T]].toList.map(_.toString)
+    val labels = getLabels[NamedTupleDecomposition.Names[T]]
     val types = getTypes[NamedTupleDecomposition.DropNames[T]]
     decodeNamedTuple(labels.zip(types))
-
-  private inline def getTypes[T <: Tuple]: List[StringParser[?]] = inline erasedValue[T] match
-    case _: EmptyTuple => Nil
-    case _: (t *: ts) => summonInline[StringParser[t]] :: getTypes[ts]
 
   private def decodeNamedTuple[T <: NamedTuple.AnyNamedTuple](
     elements: List[(String, StringParser[?])]
   ): ToNamedTuple[T] =
-    type TN = NamedTupleDecomposition.Names[T]
-    type TV = NamedTupleDecomposition.DropNames[T]
     (r: Record) =>
-      val instance = for (label, parser) <- elements yield r.get(label)(using parser)
-      val (left, right) = instance.partitionMap(identity)
-      left.headOption.toLeft(NamedTuple[TN, TV](Tuple.fromArray(right.toArray).asInstanceOf[TV]).asInstanceOf[T])
+      decodeLabeled(r, elements): vals =>
+        NamedTuple(Tuple.fromArray(vals.toArray)).asInstanceOf[T]
 
 /** `ToProduct` companion object with given instance of record to product converter. */
-object ToProduct:
+object ToProduct extends ToLabeled:
 
   /** Given instance for converter from record product (case class). */
   inline given toProduct[P <: Product](using m: Mirror.ProductOf[P]): ToProduct[P] =
+    // val labels = getLabels[m.MirroredElemLabels]
     val labels = getLabels[m.MirroredElemLabels]
     val types = getTypes[m.MirroredElemTypes]
     decodeProduct(m, labels.zip(types))
-
-  /* Get tuple values as list of string - used to get names of fields of case class (provided by `Mirror`). */
-  private[spata] inline def getLabels[T <: Tuple]: List[String] = inline erasedValue[T] match
-    case _: EmptyTuple => Nil
-    case _: (t *: ts) => constValue[t].toString :: getLabels[ts]
-
-  /* Get tuple types as list of string parsers - used to get types of fields of case class (provided by `Mirror`). */
-  private inline def getTypes[T <: Tuple]: List[StringParser[?]] = inline erasedValue[T] match
-    case _: EmptyTuple => Nil
-    case _: (t *: ts) => summonInline[StringParser[t]] :: getTypes[ts]
 
   /* Assemble product from record using field names and typed parsers retrieved from `Mirror`. */
   private def decodeProduct[T <: Product](
@@ -126,6 +109,31 @@ object ToProduct:
     elements: List[(String, StringParser[?])]
   ): ToProduct[T] =
     (r: Record) =>
-      val instance = for (label, parser) <- elements yield r.get(label)(using parser)
-      val (left, right) = instance.partitionMap(identity)
-      left.headOption.toLeft(p.fromProduct(Tuple.fromArray(right.toArray)))
+      decodeLabeled(r, elements): vals =>
+        p.fromProduct(Tuple.fromArray(vals.toArray))
+
+/* Shared helper methods for named tuples and case classes conversion. */
+private[converter] trait ToLabeled:
+
+  /* Get tuple values as list of string.
+   * Used to get names of fields of case class or named tuple (provided by `Mirror` or `NamedTupleDecomposition`).
+   */
+  protected inline def getLabels[T <: Tuple]: List[String] =
+    constValueTuple[T].toList.map(_.toString)
+
+  /* Get tuple types as list of string parsers.
+   * Used to get types of fields of case class or named tuple (provided by `Mirror` or `NamedTupleDecomposition`).
+   */
+  protected inline def getTypes[T <: Tuple]: List[StringParser[?]] = inline erasedValue[T] match
+    case _: EmptyTuple => Nil
+    case _: (t *: ts) => summonInline[StringParser[t]] :: getTypes[ts]
+
+  /* Assemble case class / named tuple from record using field names and typed parsers.
+   * They are retrieved from `Mirror` for case class and `NamedTupleDecomposition` for named tuples.
+   */
+  protected def decodeLabeled[T](record: Record, elements: List[(String, StringParser[?])])(
+    instantiate: List[?] => T
+  ): Decoded[T] =
+    val instance = for (label, parser) <- elements yield record.get(label)(using parser) // parsed values
+    val (left, right) = instance.partitionMap(identity) // split into errors (left) and correct values (right)
+    left.headOption.toLeft(instantiate(right)) // retrun error, if any, or instantiate T from values

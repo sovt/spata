@@ -21,7 +21,7 @@ import scala.deriving.Mirror
   *
   * @tparam T type of target tuple
   */
-trait ToTuple[+T <: Tuple]:
+trait ToTuple[T <: Tuple]:
 
   /** Converts record to tuple.
     *
@@ -39,7 +39,7 @@ trait ToTuple[+T <: Tuple]:
   *
   * @tparam T type of target named tuple
   */
-trait ToNamedTuple[+T <: NamedTuple.AnyNamedTuple]:
+trait ToNamedTuple[T <: NamedTuple.AnyNamedTuple]:
 
   /** Converts record to named tuple.
     *

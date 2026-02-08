@@ -89,9 +89,9 @@ final class TypedRecord[KS <: Tuple, VS <: Tuple] private (
     m: Mirror.ProductOf[P],
     ev: Tuple.Union[Tuple.Zip[m.MirroredElemLabels, m.MirroredElemTypes]] <:< Tuple.Union[Tuple.Zip[KS, VS]]
   ): P =
-    val labels = constValueTuple[m.MirroredElemLabels].toList.map(_.toString)
-    val vals: List[Any] = labels.map(l => get(l, keys, values))
-    m.fromProduct(Tuple.fromArray(vals.toArray))
+    val labels = constValueTuple[m.MirroredElemLabels].toArray.map(_.toString)
+    val vals: Array[Any] = labels.map(l => get(l, keys, values))
+    m.fromProduct(Tuple.fromArray(vals))
 
   /** Converts typed record to a named tuple.
     *
@@ -114,9 +114,9 @@ final class TypedRecord[KS <: Tuple, VS <: Tuple] private (
     ev: Tuple.Union[Tuple.Zip[NamedTupleDecomposition.Names[T], NamedTupleDecomposition.DropNames[T]]] <:<
       Tuple.Union[Tuple.Zip[KS, VS]]
   ): T =
-    val labels = constValueTuple[NamedTupleDecomposition.Names[T]].toList.map(_.toString)
-    val vals: List[Any] = labels.map(l => get(l, keys, values))
-    NamedTuple(Tuple.fromArray(vals.toArray)).asInstanceOf[T]
+    val labels = constValueTuple[NamedTupleDecomposition.Names[T]].toArray.map(_.toString)
+    val vals: Array[Any] = labels.map(l => get(l, keys, values))
+    NamedTuple(Tuple.fromArray(vals)).asInstanceOf[T]
 
   /* Gets value from `values` matching the `key` from `keys`.
    * It starts with full tuples of keys and values and recursivelyreduces them until matching key is found.

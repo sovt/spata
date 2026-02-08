@@ -63,6 +63,31 @@ class TypedRecordTS extends AnyFunSuite:
     assert(v2 == r("_2"))
     assert(v3 == r("_3"))
 
+  test("Typed record allows conversion to named tuples"):
+    type FullData = (id: Int, code: String, name: String, description: Option[String], inventory: Int)
+    type PartialData = (id: Int, name: String)
+    val r = TypedRecord(
+      ("id", "inventory", "code", "name", "description"): ("id", "inventory", "code", "name", "description"),
+      (1, 100, "MX1", "Mask X1", None: Option[String]),
+      1,
+      1
+    )
+    val fd = r.to[FullData]
+    val pd = r.to[PartialData]
+    assert(fd.id == r("id"))
+    assert(fd.name == r("name"))
+    assert(pd.id == r("id"))
+    assert(pd.name == r("name"))
+
+  test("Typed record prevents convertion to incompatible named tuples"):
+    @unused type Correct = (id: Int, code: String, name: String)
+    @unused type WrongType = (id: Int, code: Int, name: String)
+    @unused type WrongKey = (id: Int, cod: String, name: String)
+    @unused val r = TypedRecord(("id", "code", "name"): ("id", "code", "name"), (1, "MX1", "Mask X1"), 1, 1)
+    assertCompiles("r.to[Correct]")
+    assertDoesNotCompile("r.to[WrongType]")
+    assertDoesNotCompile("r.to[WrongKey]")
+
   test("Typed record can be empty"):
     val r = TypedRecord(EmptyTuple, EmptyTuple, 1, 1)
     assert(r.rowNum == 1)

@@ -93,6 +93,31 @@ final class TypedRecord[KS <: Tuple, VS <: Tuple] private (
     val vals: List[Any] = labels.map(l => get(l, keys, values))
     m.fromProduct(Tuple.fromArray(vals.toArray))
 
+  /** Converts typed record to a named tuple.
+    *
+    * Because typed record has already got all the values properly typed, it may be safely converted to a typed tuple.
+    * Assuming, that the record has a field `name` of type `String` and a field `birthdate` of type `LocalDate`,
+    * the conversion is as simple as that:
+    * ```
+    * type Person = (name: String, birthdate: LocalDate)
+    * val person = record.to[Person]
+    * ```
+    *
+    * Please note that the conversion is name-based (named tuple field names have to match record fields),
+    * is case sensitive and only shallow conversion is supported.
+    * Named tuple may be narrower and effectively retrieve only a subset of record's fields.
+    *
+    * @tparam T the named tuple type to converter this record to
+    * @return the requested named tuple
+    */
+  inline def to[T <: NamedTuple.AnyNamedTuple](using
+    ev: Tuple.Union[Tuple.Zip[NamedTupleDecomposition.Names[T], NamedTupleDecomposition.DropNames[T]]] <:<
+      Tuple.Union[Tuple.Zip[KS, VS]]
+  ): T =
+    val labels = constValueTuple[NamedTupleDecomposition.Names[T]].toList.map(_.toString)
+    val vals: List[Any] = labels.map(l => get(l, keys, values))
+    NamedTuple(Tuple.fromArray(vals.toArray)).asInstanceOf[T]
+
   /* Gets value from `values` matching the `key` from `keys`.
    * It starts with full tuples of keys and values and recursivelyreduces them until matching key is found.
    * This method  and `getT` call each other alternately to reduce keys and values accordingly.

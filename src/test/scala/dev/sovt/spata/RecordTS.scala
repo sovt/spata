@@ -184,6 +184,16 @@ class RecordTS extends AnyFunSuite with TableDrivenPropertyChecks:
       assert(md.isRight)
       assert(md.contains((name, value, date)))
 
+  test("named tuple may use fewer fields than the record has and have optional fields"):
+    type Data = (name: String, value: Option[BigDecimal])
+    val header = Header("name", "date", "value")
+    forAll(basicCases): (_: String, name: String, sDate: String, sValue: String) =>
+      val record = createRecord(name, sDate, sValue)(header)
+      val md = record.to[Data]
+      assert(md.isRight)
+      assert(md.forall(_.name == name))
+      if sValue.trim.isEmpty then assert(md.forall(_.value.isEmpty)) else assert(md.forall(_.value.contains(value)))
+
   test("records may be created from sequence of string values"):
     val header = Header("name", "date", "value")
     forAll(basicCases): (_: String, name: String, sDate: String, sValue: String) =>

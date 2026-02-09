@@ -18,7 +18,7 @@ import scala.deriving.Mirror
   *
   * @tparam P type of source entity
   */
-trait FromTuple[-T <: Tuple]:
+trait FromTuple[T <: Tuple]:
 
   /** Converts tuple to record.
     *

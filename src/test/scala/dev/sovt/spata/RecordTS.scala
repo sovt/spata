@@ -274,6 +274,40 @@ class RecordTS extends AnyFunSuite with TableDrivenPropertyChecks:
         assert(record("date").contains(sDate.strip()))
         assert(record("value").contains(sValue.strip()))
 
+  test("records may be created from named tuples"):
+    type Data = (num: Long, value: BigDecimal, date: LocalDate)
+    forAll(formatted):
+      (
+        _: String,
+        sNum: String,
+        numFmt: NumberFormat,
+        sDate: String,
+        dateFmt: DateTimeFormatter,
+        sValue: String,
+        valueFmt: DecimalFormat
+      ) =>
+        given nsp: StringParser[Long] with
+          def apply(str: String) = numFmt.parse(str).longValue()
+        given ldsp: StringParser[LocalDate] with
+          def apply(str: String) = LocalDate.parse(str.strip, dateFmt)
+        given dsp: StringParser[BigDecimal] with
+          def apply(str: String) = valueFmt.parse(str).asInstanceOf[java.math.BigDecimal]
+        val data: Data = (
+          StringParser.parse[Long](sNum).getOrElse(0L),
+          StringParser.parse[BigDecimal](sValue).getOrElse(BigDecimal(0.0)),
+          StringParser.parse[LocalDate](sDate).getOrElse(LocalDate.now())
+        )
+        given lr: StringRenderer[Long] with
+          def apply(l: Long) = numFmt.format(l)
+        given dsr: StringRenderer[BigDecimal] with
+          def apply(bd: BigDecimal) = valueFmt.format(bd)
+        given ldsr: StringRenderer[LocalDate] with
+          def apply(ld: LocalDate) = dateFmt.format(ld)
+        val record = data.toRecord
+        assert(record("num").contains(sNum.strip()))
+        assert(record("date").contains(sDate.strip()))
+        assert(record("value").contains(sValue.strip()))
+
   test("records may be created from tuples"):
     forAll(formatted):
       (
@@ -306,6 +340,39 @@ class RecordTS extends AnyFunSuite with TableDrivenPropertyChecks:
         assert(record("_1").contains(sNum.strip()))
         assert(record("_2").contains(sValue.strip()))
         assert(record("_3").contains(sDate.strip()))
+
+  test("Record.from resolves correct overload for each type"):
+    case class CC(name: String, age: Int)
+    type NT = (name: String, age: Int)
+    type PT = (String, Int)
+    val cc = CC("Moomin", 7)
+    val nt: NT = (name = "Moomin", age = 7)
+    val pt: PT = ("Moomin", 7)
+    val fromCC = Record.from(cc)
+    val fromNT = Record.from(nt)
+    val fromPT = Record.from(pt)
+    // case class: field names as headers
+    assert(fromCC.header.names == Seq("name", "age"))
+    assert(fromCC("name").contains("Moomin"))
+    assert(fromCC("age").contains("7"))
+    // named tuple: field names as headers
+    assert(fromNT.header.names == Seq("name", "age"))
+    assert(fromNT("name").contains("Moomin"))
+    assert(fromNT("age").contains("7"))
+    // plain tuple: positional headers
+    assert(fromPT.header.names == Seq("_1", "_2"))
+    assert(fromPT("_1").contains("Moomin"))
+    assert(fromPT("_2").contains("7"))
+
+  test("named tuple round-trips through Record"):
+    type Data = (name: String, value: BigDecimal, date: LocalDate)
+    val header = Header("name", "date", "value")
+    forAll(basicCases): (_: String, name: String, sDate: String, sValue: String) =>
+      val original: Data = (name, value, date)
+      val record = Record.from(original)
+      val decoded = record.to[Data]
+      assert(decoded.isRight)
+      assert(decoded.contains(original))
 
   test("records may be updated by name or index"):
     val valBefore = "999.99"

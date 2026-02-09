@@ -10,6 +10,7 @@ import dev.sovt.spata.Header
 import dev.sovt.spata.Record
 import dev.sovt.spata.text.StringRenderer
 
+import scala.compiletime.constValueTuple
 import scala.deriving.Mirror
 
 /** Converter from a tuple to a record.
@@ -29,6 +30,21 @@ trait FromTuple[T <: Tuple]:
 
   /* Converts tuple to list of strings. */
   private[converter] def encodeRaw(t: T): List[String]
+
+/** Converter from a named tuple to a record.
+  *
+  * This trait defines behavior to be implemented by concrete, given converters.
+  *
+  * @tparam T type of source entity.
+  */
+trait FromNamedTuple[T <: NamedTuple.AnyNamedTuple]:
+
+  /** Converts product (case class) to record.
+    *
+    * @param p the source entity to be converted.
+    * @return the record with fields from provided entity.
+    */
+  def encode(t: T): Record
 
 /** Converter from a product (case class) to a record.
   *
@@ -56,6 +72,24 @@ object FromTuple:
   given fromCons[H: StringRenderer, T <: Tuple: FromTuple]: FromTuple[H *: T] with
     private[converter] def encodeRaw(t: H *: T): List[String] =
       summon[StringRenderer[H]](t.head) :: summon[FromTuple[T]].encodeRaw(t.tail)
+
+/** `FromNamedTuple` companion object with given instance of named tuple to record converter. */
+object FromNamedTuple:
+
+  /** Given instance for converter from named tuple to record. */
+  inline given fromNamedTuple[T <: NamedTuple.AnyNamedTuple](using
+    ft: FromTuple[NamedTupleDecomposition.DropNames[T]]
+  ): FromNamedTuple[T] =
+    val labels = constValueTuple[NamedTupleDecomposition.Names[T]].toList.map(_.toString)
+    encodeNamedTuple(ft, labels)
+
+  private def encodeNamedTuple[T <: NamedTuple.AnyNamedTuple, V <: Tuple](
+    ft: FromTuple[V],
+    labels: List[String]
+  ): FromNamedTuple[T] =
+    (t: T) =>
+      val values = ft.encodeRaw(t.asInstanceOf[V])
+      Record(values*)(Header(labels*))
 
 /** `FromProduct` companion object with given instance of product to record converter. */
 object FromProduct:

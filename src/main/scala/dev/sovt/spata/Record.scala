@@ -6,6 +6,7 @@
  */
 package dev.sovt.spata
 
+import dev.sovt.spata.converter.FromNamedTuple
 import dev.sovt.spata.converter.FromProduct
 import dev.sovt.spata.converter.FromTuple
 import dev.sovt.spata.converter.RecordDecoder
@@ -597,6 +598,8 @@ object Record:
     */
   def from[T <: Tuple: FromTuple](tuple: T): Record = summon[FromTuple[T]].encode(tuple)
 
+  def from[T <: NamedTuple.AnyNamedTuple: FromNamedTuple](tuple: T): Record = summon[FromNamedTuple[T]].encode(tuple)
+
   /** Creates new record builder. */
   def builder: Builder = Builder(List.empty[(String, String)])
 
@@ -611,6 +614,17 @@ object Record:
       * @return new record
       */
     extension [P <: Product: FromProduct](product: P) def toRecord: Record = summon[FromProduct[P]].encode(product)
+
+    /** Converts named tuple to [[Record]].
+      *
+      * @see [[Record.from]] for more information.
+      *
+      * @param tuple named tuple to extend
+      * @tparam T concrete type of named tuple with given type class providing support for conversion
+      * @return new record
+      */
+    extension [T <: NamedTuple.AnyNamedTuple: FromNamedTuple](tuple: T)
+      def toRecord: Record = summon[FromNamedTuple[T]].encode(tuple)
 
     /** Converts [[scala.Tuple]] to [[Record]].
       * Althogh product conversion works for tuples too, this tuple-optimized version is more efficient.

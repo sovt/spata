@@ -27,9 +27,9 @@ lazy val root = (project in file("."))
   .settings(
     versionScheme := Some("semver-spec"),
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-effect" % "3.6.3",
-      "co.fs2" %% "fs2-core" % "3.12.2",
-      "co.fs2" %% "fs2-io" % "3.12.2",
+      "org.typelevel" %% "cats-effect" % "3.7.0",
+      "co.fs2" %% "fs2-core" % "3.13.0",
+      "co.fs2" %% "fs2-io" % "3.13.0",
       "org.slf4j" % "slf4j-api" % "2.0.17",
       "org.scalatest" %% "scalatest" % "3.2.19" % Test,
       (("com.storm-enroute" %% "scalameter" % "0.21").cross(CrossVersion.for3Use2_13) % Test)

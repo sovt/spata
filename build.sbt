@@ -5,7 +5,7 @@ lazy val basicSettings = Seq(
   startYear := Some(2020),
   name := "spata",
   description := "Functional, stream based CSV processor for Scala",
-  scalaVersion := "3.8.1"
+  scalaVersion := "3.8.3"
 )
 
 addCommandAlias("check", "; scalafmtCheck ; scalafix --check")
@@ -31,7 +31,7 @@ lazy val root = (project in file("."))
       "co.fs2" %% "fs2-core" % "3.13.0",
       "co.fs2" %% "fs2-io" % "3.13.0",
       "org.slf4j" % "slf4j-api" % "2.0.17",
-      "org.scalatest" %% "scalatest" % "3.2.19" % Test,
+      "org.scalatest" %% "scalatest" % "3.2.20" % Test,
       (("com.storm-enroute" %% "scalameter" % "0.21").cross(CrossVersion.for3Use2_13) % Test)
         .exclude("org.scala-lang.modules", "scala-xml_2.13"),
       "org.slf4j" % "slf4j-simple" % "2.0.17" % Test
@@ -98,7 +98,7 @@ lazy val scalacSettings = Seq(
 
 import com.typesafe.tools.mima.core.*
 lazy val mimaIssueFilters = Seq(
-  // These problems started being reported after upgrading Scala from 3.7.4 to 3.8.1, without any changes to the code
+  // These problems started being reported after upgrading Scala from 3.7.4 to 3.8.*, without any changes to the code
   ProblemFilters.exclude[DirectMissingMethodProblem]("dev.sovt.spata.CSVParser.<clinit>"),
   ProblemFilters.exclude[DirectMissingMethodProblem]("dev.sovt.spata.CSVRenderer.<clinit>"),
   ProblemFilters.exclude[DirectMissingMethodProblem]("dev.sovt.spata.HeaderMap.<clinit>"),
